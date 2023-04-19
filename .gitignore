@@ -1,3 +1,7 @@
 *.iml
 **/*.idea
 /.ipynb_checkpoints/
+/IDEA_Plugin/
+*/target/**
+target
+/.bsp/
