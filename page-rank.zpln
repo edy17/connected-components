@@ -1,0 +1,523 @@
+﻿{
+ "paragraphs": [
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "%spark.conf\nspark.master local[*]\nspark.app.name page-rank",
+   "id": "",
+   "dateCreated": "2024-04-19 13:20:17.360",
+   "config": {},
+   "dateStarted": "2024-04-24 17:48:44.321",
+   "dateUpdated": "2024-04-24 17:48:44.685",
+   "dateFinished": "2024-04-24 17:48:44.685",
+   "results": {
+    "code": "SUCCESS",
+    "msg": []
+   }
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {}
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "%spark.conf\nspark.master local[6]\nspark.app.name page-rank\nspark.driver.memory 1g\nspark.driver.cores 1\nspark.executor.instances 3\nspark.executor.cores 2\nspark.executor.memory 2g\nspark.default.parallelism 6",
+   "id": "",
+   "dateCreated": "2023-09-15 16:37:29.110",
+   "config": {},
+   "dateStarted": "2024-04-22 06:15:54.842",
+   "dateUpdated": "2024-04-22 06:15:54.958",
+   "dateFinished": "2024-04-22 06:15:54.958",
+   "results": {
+    "code": "SUCCESS",
+    "msg": []
+   }
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "println(spark.sparkContext.appName)",
+   "id": "",
+   "dateCreated": "2023-09-15 17:36:44.394",
+   "config": {
+    "tableHide": false
+   },
+   "dateStarted": "2024-04-24 17:48:47.836",
+   "dateUpdated": "2024-04-24 17:49:17.011",
+   "dateFinished": "2024-04-24 17:49:17.011",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "page-rank\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "System.getProperty(\"os.name\")",
+   "id": "",
+   "dateCreated": "2024-04-24 17:49:18.941",
+   "config": {},
+   "dateStarted": "2024-04-24 17:49:22.309",
+   "dateUpdated": "2024-04-24 17:49:22.626",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mres2\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = Linux\n"
+     }
+    ]
+   },
+   "dateFinished": "2024-04-24 17:49:22.626"
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "import org.apache.spark.rdd.RDD\nimport org.apache.spark.SparkFiles\nimport org.apache.spark.util.LongAccumulator\nimport org.apache.spark.HashPartitioner\nimport scala.collection.immutable.ListMap\n\nvar root = \"file://\"\nif (System.getProperty(\"os.name\").toLowerCase().contains(\"windows\"))\n    root = \"file:////\"",
+   "id": "",
+   "dateCreated": "2024-04-22 06:16:20.426",
+   "config": {},
+   "dateStarted": "2024-04-24 17:58:12.398",
+   "dateUpdated": "2024-04-24 17:58:12.795",
+   "dateFinished": "2024-04-24 17:58:12.795",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "import org.apache.spark.rdd.RDD\nimport org.apache.spark.SparkFiles\nimport org.apache.spark.util.LongAccumulator\nimport org.apache.spark.HashPartitioner\nimport scala.collection.immutable.ListMap\n\u001b[1m\u001b[34mroot\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = file://\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "%md\n# PageRank en Scala avec Spark\n***\nCe document présente une approche en scala et Spark pour le calcul de PageRank des nœuds d'un graphe représentant un réseau de page Web interconnecté.",
+   "id": "",
+   "dateCreated": "2023-04-23 10:57:55.213",
+   "config": {
+    "editorHide": false
+   },
+   "dateStarted": "2024-04-19 13:21:15.474",
+   "dateUpdated": "2024-04-19 13:21:20.269",
+   "dateFinished": "2024-04-19 13:21:20.269"
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "def basicPageRank(\n                         links: RDD[(String, Iterable[String])], // RDD des paires (url, neighbors)\n                         rank: RDD[(String, Double)] // RDD des paires (url, rank)\n                 ): RDD[(String, Double)] = {\n    val contributions = links.join(rank).flatMap {\n        case (url, (neighbors, rank)) =>\n            neighbors.map(dest => (dest, rank / neighbors.size))\n    }\n    contributions.reduceByKey(_ + _)\n}\n\n\ndef converge(\n                    edges: RDD[(String, String)],\n                    pageRank: (RDD[(String, Iterable[String])], RDD[(String, Double)]) => RDD[(String, Double)]\n            ): RDD[(String, Double)] = {\n    val nodes = edges.flatMap(x => Array(x._1, x._2)).distinct()\n    val nodesCount = nodes.count()\n    val links = edges.groupByKey() // RDD des paires (url, neighbors)\n    var rank = nodes.map(x => (x, 1D)) // RDD des paires (url, rank)\n    var oldRank = nodes.map(x => (x, 0D))\n    //seuil de convergence correspondant au minimum de la somme des écarts entre les pageRanks avant et après une itération\n    val threshold = 0.0001\n    //Boucle exécuté tant que le seuil de convergence n'est pas atteint \n    while (oldRank.join(rank).map(x => (x._2._1 - x._2._2).abs).fold(0)((acc, x) => acc + x) > threshold) {\n        oldRank = rank\n        rank = pageRank(links, rank)\n    }\n    //Normalisation en probabilités\n    rank.mapValues(_ / nodesCount)\n}",
+   "id": "",
+   "dateCreated": "2023-04-23 05:42:58.333",
+   "config": {
+    "tableHide": false
+   },
+   "dateStarted": "2024-04-24 18:00:58.305",
+   "dateUpdated": "2024-04-24 18:01:00.597",
+   "dateFinished": "2024-04-24 18:01:00.597",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mbasicPageRank\u001b[0m: \u001b[1m\u001b[32m(links: org.apache.spark.rdd.RDD[(String, Iterable[String])], rank: org.apache.spark.rdd.RDD[(String, Double)])org.apache.spark.rdd.RDD[(String, Double)]\u001b[0m\n\u001b[1m\u001b[34mconverge\u001b[0m: \u001b[1m\u001b[32m(edges: org.apache.spark.rdd.RDD[(String, String)], pageRank: (org.apache.spark.rdd.RDD[(String, Iterable[String])], org.apache.spark.rdd.RDD[(String, Double)]) => org.apache.spark.rdd.RDD[(String, Double)])org.apache.spark.rdd.RDD[(String, Double)]\u001b[0m\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "spark.sparkContext.addFile(\"https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_1.txt\")\nval raw_data = spark.sparkContext.textFile(root + SparkFiles.get(\"test_links_1.txt\"))\n        .filter(x => !x.contains(\"#\"))\nval segments = raw_data.map(x => x.split(\"\\t\")).map(x => (x(0), x(1)))\nsegments.collect()",
+   "id": "",
+   "dateCreated": "2024-04-19 13:21:51.580",
+   "config": {},
+   "dateStarted": "2024-04-24 17:59:09.158",
+   "dateUpdated": "2024-04-24 17:59:13.908",
+   "dateFinished": "2024-04-24 17:59:13.908",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mraw_data\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[String]\u001b[0m = MapPartitionsRDD[2] at filter at <console>:36\n\u001b[1m\u001b[34msegments\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, String)]\u001b[0m = MapPartitionsRDD[4] at map at <console>:37\n\u001b[1m\u001b[34mres5\u001b[0m: \u001b[1m\u001b[32mArray[(String, String)]\u001b[0m = Array((A,B), (A,C), (A,D), (B,A), (B,D), (D,B), (D,C), (C,A))\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "config": {},
+   "text": "val t0 = System.nanoTime()\nval scores = converge(segments, basicPageRank)\nval t1 = System.nanoTime()\nprintln(s\"Elapsed time : ${((t1 - t0) / 1000000000)} seconds\")\nprintln(\"PageRank : \")\nscores.sortByKey().collect().foreach(println)",
+   "dateStarted": "2024-04-22 02:49:15.883",
+   "dateUpdated": "2024-04-22 02:49:20.386",
+   "dateFinished": "2024-04-22 02:49:20.386",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "Elapsed time : 3 seconds\nPageRank : \n(A,0.33333587646484375)\n(B,0.22222137451171875)\n(C,0.22222137451171875)\n(D,0.22222137451171875)\n\u001b[1m\u001b[34mt0\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 10560061925737\n\u001b[1m\u001b[34mscores\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, Double)]\u001b[0m = MapPartitionsRDD[151] at mapValues at <console>:53\n\u001b[1m\u001b[34mt1\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 10564010293301\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "%md\n## Cul-de-sac",
+   "id": "",
+   "dateCreated": "2024-04-19 13:23:52.663",
+   "config": {}
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "//Accumulateur permettant de compter les culs de sac\nval culDeSacCount: LongAccumulator = spark.sparkContext.longAccumulator(\"culDeSacCount\")\n\n//Méthode permettant de supprimer les culs-de-sac de trouvés de façon naive sur un graphe\ndef removeCulDeSac(edges: RDD[(String, String)]): (RDD[(String, String)], RDD[String], Array[String]) = {\n    val nodes = edges.flatMap(x => Array(x._1, x._2)).distinct()\n    val links = edges.groupByKey() // RDD de paires (url, neighbors)\n    val culDeSacRDD = nodes.subtract(links.keys)\n    var bestSegments = edges\n    val culDeSacCollection = culDeSacRDD.collect()\n    culDeSacCollection.foreach(x => {\n        bestSegments = bestSegments.filter(y => !Array(y._1, y._2).contains(x))\n    })\n    (bestSegments, culDeSacRDD, culDeSacCollection)\n}\n\n//Méthode permettant de supprimer récursivement tous les culs-de-sac  d'un Graphe\ndef removeAllCulDeSac(edges: RDD[(String, String)]): (RDD[(String, String)], RDD[String], Array[String]) = {\n    var (bestEdges, culDeSacRDD, culDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeCulDeSac(edges)\n    culDeSacCount.reset()\n    var badNodesCount = culDeSacRDD.map(x => 1).fold(0)((acc, x) => acc + 1)\n    while (badNodesCount != culDeSacCount.value) {\n        culDeSacCount.reset()\n        culDeSacCount.add(badNodesCount)\n        val (newEdges, newCulDeSacRDD, newCulDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeCulDeSac(bestEdges)\n        bestEdges = newEdges\n        culDeSacRDD = culDeSacRDD.union(newCulDeSacRDD)\n        culDeSacCollection = Array.concat(culDeSacCollection, newCulDeSacCollection)\n    }\n    (bestEdges, culDeSacRDD, culDeSacCollection)\n}\n\n//Méthode de calcul de PageRank sur un graphe avec gestion des de Culs-de-sac\ndef computePageRank(edges: RDD[(String, String)]): (RDD[(String, Double)], Array[String]) = {\n    //On sépare les culs-de-sac du graphe en entré et on calcul les PageRank sur le graphe connecté resultant\n    val (bestEdges, culDeSacRDD, culDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeAllCulDeSac(edges)\n    val links = edges.groupByKey() // RDD of (url, neighbors) pairs\n    var ranks = converge(bestEdges, basicPageRank)\n    //Si le graphe en entré contient des Culs-de-sac, on calcul leur pageRank à partir de ceux de leur connexion présent dans le graphe connecté\n    if (culDeSacCollection.length > 0) {\n        var culDeSacRanks = culDeSacRDD.map(x => (x, 0D))\n        while (culDeSacRanks.filter(x => x._2 == 0).count() > 0) {\n            val tmp = links.join(ranks.union(culDeSacRanks))\n            var newCulDeSacRanks = spark.sparkContext.emptyRDD[(String, Double)]\n            culDeSacCollection.foreach(x => {\n                newCulDeSacRanks = tmp.filter {\n                    case (url, (neighbors, rank)) =>\n                        neighbors.count(y => x.equals(y)) >= 1\n                }.map {\n                    case (url, (neighbors, rank)) =>\n                        (x, rank / neighbors.size)\n                }.union(newCulDeSacRanks)\n            })\n            culDeSacRanks = newCulDeSacRanks.reduceByKey(_ + _)\n        }\n        ranks = ranks.union(culDeSacRanks)\n    }\n    (ranks.sortByKey(), culDeSacCollection)\n}\n",
+   "id": "",
+   "dateCreated": "2024-04-19 13:24:17.204",
+   "config": {},
+   "dateStarted": "2024-04-24 18:01:04.798",
+   "dateUpdated": "2024-04-24 18:01:05.853",
+   "dateFinished": "2024-04-24 18:01:05.853",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mculDeSacCount\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.util.LongAccumulator\u001b[0m = LongAccumulator(id: 35, name: Some(culDeSacCount), value: 0)\n\u001b[1m\u001b[34mremoveCulDeSac\u001b[0m: \u001b[1m\u001b[32m(edges: org.apache.spark.rdd.RDD[(String, String)])(org.apache.spark.rdd.RDD[(String, String)], org.apache.spark.rdd.RDD[String], Array[String])\u001b[0m\n\u001b[1m\u001b[34mremoveAllCulDeSac\u001b[0m: \u001b[1m\u001b[32m(edges: org.apache.spark.rdd.RDD[(String, String)])(org.apache.spark.rdd.RDD[(String, String)], org.apache.spark.rdd.RDD[String], Array[String])\u001b[0m\n\u001b[1m\u001b[34mcomputePageRank\u001b[0m: \u001b[1m\u001b[32m(edges: org.apache.spark.rdd.RDD[(String, String)])(org.apache.spark.rdd.RDD[(String, Double)], Array[String])\u001b[0m\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "spark.sparkContext.addFile(\"https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_2.txt\")\nval raw_data = spark.sparkContext.textFile(root + SparkFiles.get(\"test_links_2.txt\"))\n        .filter(x => !x.contains(\"#\"))\nval segments = raw_data.map(x => x.split(\"\\t\")).map(x => (x(0), x(1)))\nsegments.collect()",
+   "id": "",
+   "dateCreated": "2024-04-19 13:25:34.391",
+   "config": {},
+   "dateStarted": "2024-04-22 02:56:53.017",
+   "dateUpdated": "2024-04-22 02:56:53.836",
+   "dateFinished": "2024-04-22 02:56:53.836",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mraw_data\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[String]\u001b[0m = MapPartitionsRDD[157] at filter at <console>:29\n\u001b[1m\u001b[34msegments\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, String)]\u001b[0m = MapPartitionsRDD[159] at map at <console>:30\n\u001b[1m\u001b[34mres4\u001b[0m: \u001b[1m\u001b[32mArray[(String, String)]\u001b[0m = Array((A,B), (A,C), (A,D), (B,A), (B,D), (D,B), (D,C))\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "val t0 = System.nanoTime()\nval (scores, culDeSac) = computePageRank(segments)\nval t1 = System.nanoTime()\nprintln(s\"Elapsed time : ${((t1 - t0) / 1000000000)} seconds\")\nprintln(\"PageRank : \")\nscores.sortByKey().collect().foreach(println)\nprintln(\"Culs-de-sac : \")\nculDeSac.foreach(println)\nprintln(s\"Sum of probabilities : ${scores.values.sum()}\")",
+   "id": "",
+   "dateCreated": "2024-04-19 16:43:24.932",
+   "config": {},
+   "dateStarted": "2024-04-22 02:57:38.844",
+   "dateUpdated": "2024-04-22 02:57:42.198",
+   "dateFinished": "2024-04-22 02:57:42.197",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "Elapsed time : 2 seconds\nPageRank : \n(A,0.22221883138020834)\n(B,0.4444478352864583)\n(C,0.24073961046006942)\n(D,0.3333333333333333)\nCuls-de-sac : \nC\nSum of probabilities : 1.2407396104600692\n\u001b[1m\u001b[34mt0\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 11062948730674\n\u001b[1m\u001b[34mscores\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, Double)]\u001b[0m = ShuffledRDD[346] at sortByKey at <console>:85\n\u001b[1m\u001b[34mculDeSac\u001b[0m: \u001b[1m\u001b[32mArray[String]\u001b[0m = Array(C)\n\u001b[1m\u001b[34mt1\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 11065839318384\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "%md\n## Pièges dans la toile",
+   "id": "",
+   "dateCreated": "2024-04-19 13:24:10.881",
+   "config": {}
+  },
+  {
+   "text": "def optimizedPageRank(\n                             links: RDD[(String, Iterable[String])], // RDD des paires (url, neighbors)\n                             rank: RDD[(String, Double)] // RDD des paires (url, rank)\n                     ): RDD[(String, Double)] = {\n    val contributions = links.join(rank).flatMap {\n        case (url, (neighbors, rank)) =>\n            neighbors.map(dest => (dest, rank / neighbors.size))\n    }\n    contributions.reduceByKey(_ + _).mapValues(.15 +.85 * _)\n}",
+   "user": "anonymous",
+   "dateUpdated": "2024-04-22 06:18:46.177",
+   "progress": 0.0,
+   "config": {
+    "editorHide": false
+   },
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "runtimeInfos": {},
+   "progressUpdateIntervalMs": 500.0,
+   "jobName": "paragraph_1681727015140_723499630",
+   "id": "paragraph_1681727015140_723499630",
+   "dateCreated": "2023-04-17T10:23:35+0000",
+   "dateStarted": "2024-04-22 06:18:45.767",
+   "dateFinished": "2024-04-22 06:18:46.177",
+   "status": "FINISHED",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34moptimizedPageRank\u001b[0m: \u001b[1m\u001b[32m(links: org.apache.spark.rdd.RDD[(String, Iterable[String])], rank: org.apache.spark.rdd.RDD[(String, Double)])org.apache.spark.rdd.RDD[(String, Double)]\u001b[0m\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "spark.sparkContext.addFile(\"https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_3.txt\")\nval raw_data = spark.sparkContext.textFile(root + SparkFiles.get(\"test_links_3.txt\"))\n        .filter(x => !x.contains(\"#\"))\nval segments = raw_data.map(x => x.split(\"\\t\")).map(x => (x(0), x(1)))\nsegments.collect()",
+   "config": {},
+   "dateStarted": "2024-04-22 02:59:23.235",
+   "dateUpdated": "2024-04-22 02:59:24.013",
+   "dateFinished": "2024-04-22 02:59:24.013",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mraw_data\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[String]\u001b[0m = MapPartitionsRDD[353] at filter at <console>:29\n\u001b[1m\u001b[34msegments\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, String)]\u001b[0m = MapPartitionsRDD[355] at map at <console>:30\n\u001b[1m\u001b[34mres6\u001b[0m: \u001b[1m\u001b[32mArray[(String, String)]\u001b[0m = Array((A,B), (A,C), (A,D), (B,A), (B,D), (D,B), (D,C), (C,C))\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "val t0 = System.nanoTime()\nval scores = converge(segments, optimizedPageRank)\nval t1 = System.nanoTime()\nprintln(s\"Elapsed time : ${((t1 - t0) / 1000000000)} seconds\")\nprintln(\"PageRank : \")\nscores.sortByKey().collect().foreach(println)",
+   "config": {},
+   "dateStarted": "2024-04-22 02:59:29.818",
+   "dateUpdated": "2024-04-22 02:59:32.562",
+   "dateFinished": "2024-04-22 02:59:32.562",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "Elapsed time : 2 seconds\nPageRank : \n(A,0.08249806035575515)\n(B,0.10587336990486451)\n(C,0.7057551998345155)\n(D,0.10587336990486451)\n\u001b[1m\u001b[34mt0\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 11173882448501\n\u001b[1m\u001b[34mscores\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, Double)]\u001b[0m = MapPartitionsRDD[577] at mapValues at <console>:53\n\u001b[1m\u001b[34mt1\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m = 11176292894301\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "%md\n## Analyse expérimentale sur des graphes de taille croissante et dont les arcs représentent des vols entre des aéroports\n***",
+   "id": "",
+   "dateCreated": "2023-04-23 23:45:26.815",
+   "config": {}
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "for (i <- 1 to 12) {\n    val fileName = \"2012\" + (if (i > 9) i else (\"0\" + i)) + \".csv\"\n    spark.sparkContext.addFile(\"https://gitlab.com/diehl17/data/-/raw/main/flights/\" + fileName)\n    println(spark.sparkContext.textFile(root + SparkFiles.get(fileName)).count())\n}",
+   "id": "",
+   "dateCreated": "2024-04-22 06:10:08.488",
+   "config": {},
+   "dateStarted": "2024-04-22 06:19:12.264",
+   "dateUpdated": "2024-04-22 06:19:49.908",
+   "dateFinished": "2024-04-22 06:19:49.908",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "486134\n464827\n521629\n505219\n518424\n526934\n545132\n540794\n490200\n515255\n488007\n494219\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "var raw_data = spark.sparkContext.emptyRDD[(String, String)]\nvar timePerDataSet: Map[Int, Long] = Map()\nfor (i <- 1 to 12) {\n    val fileName = \"2012\" + (if (i > 9) i else (\"0\" + i)) + \".csv\"\n    val data = spark.sparkContext.textFile(root + SparkFiles.get(fileName))\n            .map(x => {\n                val row = x.split(\",\")\n                (row(3), row(4))\n            })\n    raw_data = raw_data.union(data)\n    val segments = raw_data.filter(x => !x._1.contains(\"ORIGIN_AIRPORT_ID\"))\n    val t0 = System.nanoTime()\n    val scores = converge(segments.partitionBy(new HashPartitioner(1)), optimizedPageRank)\n    val t1 = System.nanoTime()\n    val time = (t1 - t0) / 1000000000\n    timePerDataSet += (i -> time)\n    println(i + \" Dataset(s) processed _____________________________________\")\n    println(\"Elapsed time: \" + time + \" seconds\")\n    println(\"Total nodes: \" + scores.count())\n    println(\"Total edges: \" + segments.count())\n}",
+   "id": "",
+   "dateCreated": "2023-04-20 04:49:52.090",
+   "config": {},
+   "dateStarted": "2024-04-22 06:22:34.549",
+   "dateUpdated": "2024-04-22 06:43:03.510",
+   "dateFinished": "2024-04-22 06:43:03.510",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "1 Dataset(s) processed _____________________________________\nElapsed time: 19 seconds\nTotal nodes: 287\nTotal edges: 486133\n2 Dataset(s) processed _____________________________________\nElapsed time: 28 seconds\nTotal nodes: 287\nTotal edges: 950959\n3 Dataset(s) processed _____________________________________\nElapsed time: 42 seconds\nTotal nodes: 289\nTotal edges: 1472587\n4 Dataset(s) processed _____________________________________\nElapsed time: 57 seconds\nTotal nodes: 292\nTotal edges: 1977805\n5 Dataset(s) processed _____________________________________\nElapsed time: 64 seconds\nTotal nodes: 294\nTotal edges: 2496228\n6 Dataset(s) processed _____________________________________\nElapsed time: 79 seconds\nTotal nodes: 301\nTotal edges: 3023161\n7 Dataset(s) processed _____________________________________\nElapsed time: 108 seconds\nTotal nodes: 301\nTotal edges: 3568292\n8 Dataset(s) processed _____________________________________\nElapsed time: 123 seconds\nTotal nodes: 301\nTotal edges: 4109085\n9 Dataset(s) processed _____________________________________\nElapsed time: 137 seconds\nTotal nodes: 302\nTotal edges: 4599284\n10 Dataset(s) processed _____________________________________\nElapsed time: 146 seconds\nTotal nodes: 307\nTotal edges: 5114538\n11 Dataset(s) processed _____________________________________\nElapsed time: 189 seconds\nTotal nodes: 312\nTotal edges: 5602544\n12 Dataset(s) processed _____________________________________\nElapsed time: 220 seconds\nTotal nodes: 313\nTotal edges: 6096762\n\u001b[1m\u001b[34mraw_data\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, String)]\u001b[0m = UnionRDD[3406] at union at <console>:40\n\u001b[1m\u001b[34mtimePerDataSet\u001b[0m: \u001b[1m\u001b[32mMap[Int,Long]\u001b[0m = Map(5 -> 64, 10 -> 146, 1 -> 19, 6 -> 79, 9 -> 137, 2 -> 28, 12 -> 220, 7 -> 108, 3 -> 42, 11 -> 189, 8 -> 123, 4 -> 57)\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {
+     "bdtMeta": {
+      "inlay": {}
+     }
+    },
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "var raw_data = spark.sparkContext.emptyRDD[(String, String)]\nvar timeOptPerDataSet: Map[Int, Long] = Map()\nfor (i <- 1 to 12) {\n\n    val fileName = \"2012\" + (if (i > 9) i else (\"0\" + i)) + \".csv\"\n    val data = spark.sparkContext.textFile(root + SparkFiles.get(fileName))\n            .map(x => {\n                val row = x.split(\",\")\n                (row(3), row(4))\n            })\n    raw_data = raw_data.union(data)\n    val segments = raw_data.filter(x => !x._1.contains(\"ORIGIN_AIRPORT_ID\"))\n    val t0 = System.nanoTime()\n    val scores = converge(segments.partitionBy(new HashPartitioner(6)), optimizedPageRank)\n    val t1 = System.nanoTime()\n    val time = (t1 - t0) / 1000000000\n    timeOptPerDataSet += (i -> time)\n    println(i + \" Dataset(s) processed _____________________________________\")\n    println(\"Elapsed time: \" + time + \" seconds\")\n    println(\"Total nodes: \" + scores.count())\n    println(\"Total edges: \" + segments.count())\n}",
+   "id": "",
+   "dateCreated": "2023-04-23 22:46:38.512",
+   "config": {
+    "tableHide": false
+   },
+   "dateStarted": "2024-04-22 06:57:16.918",
+   "dateUpdated": "2024-04-22 07:06:19.491",
+   "dateFinished": "2024-04-22 07:06:19.491",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "1 Dataset(s) processed _____________________________________\nElapsed time: 10 seconds\nTotal nodes: 287\nTotal edges: 486133\n2 Dataset(s) processed _____________________________________\nElapsed time: 13 seconds\nTotal nodes: 287\nTotal edges: 950959\n3 Dataset(s) processed _____________________________________\nElapsed time: 18 seconds\nTotal nodes: 289\nTotal edges: 1472587\n4 Dataset(s) processed _____________________________________\nElapsed time: 22 seconds\nTotal nodes: 292\nTotal edges: 1977805\n5 Dataset(s) processed _____________________________________\nElapsed time: 28 seconds\nTotal nodes: 294\nTotal edges: 2496228\n6 Dataset(s) processed _____________________________________\nElapsed time: 37 seconds\nTotal nodes: 301\nTotal edges: 3023161\n7 Dataset(s) processed _____________________________________\nElapsed time: 38 seconds\nTotal nodes: 301\nTotal edges: 3568292\n8 Dataset(s) processed _____________________________________\nElapsed time: 53 seconds\nTotal nodes: 301\nTotal edges: 4109085\n9 Dataset(s) processed _____________________________________\nElapsed time: 62 seconds\nTotal nodes: 302\nTotal edges: 4599284\n10 Dataset(s) processed _____________________________________\nElapsed time: 66 seconds\nTotal nodes: 307\nTotal edges: 5114538\n11 Dataset(s) processed _____________________________________\nElapsed time: 83 seconds\nTotal nodes: 312\nTotal edges: 5602544\n12 Dataset(s) processed _____________________________________\nElapsed time: 98 seconds\nTotal nodes: 313\nTotal edges: 6096762\n\u001b[1m\u001b[34mraw_data\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[(String, String)]\u001b[0m = UnionRDD[10760] at union at <console>:44\n\u001b[1m\u001b[34mtimeOptPerDataSet\u001b[0m: \u001b[1m\u001b[32mMap[Int,Long]\u001b[0m = Map(5 -> 28, 10 -> 66, 1 -> 10, 6 -> 37, 9 -> 62, 2 -> 13, 12 -> 98, 7 -> 38, 3 -> 18, 11 -> 83, 8 -> 53, 4 -> 22)\n"
+     }
+    ]
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "FINISHED",
+   "text": "val x = ListMap(timePerDataSet.toSeq.sortBy(_._1): _*)\nval y = ListMap(timeOptPerDataSet.toSeq.sortBy(_._1): _*)",
+   "id": "",
+   "dateCreated": "2023-09-18 16:13:15.352",
+   "config": {},
+   "dateStarted": "2024-04-22 07:27:50.897",
+   "dateUpdated": "2024-04-22 07:27:51.175",
+   "dateFinished": "2024-04-22 07:27:51.175",
+   "results": {
+    "code": "SUCCESS",
+    "msg": [
+     {
+      "type": "TEXT",
+      "data": "\u001b[1m\u001b[34mx\u001b[0m: \u001b[1m\u001b[32mscala.collection.immutable.ListMap[Int,Long]\u001b[0m = ListMap(1 -> 19, 2 -> 28, 3 -> 42, 4 -> 57, 5 -> 64, 6 -> 79, 7 -> 108, 8 -> 123, 9 -> 137, 10 -> 146, 11 -> 189, 12 -> 220)\n\u001b[1m\u001b[34my\u001b[0m: \u001b[1m\u001b[32mscala.collection.immutable.ListMap[Int,Long]\u001b[0m = ListMap(1 -> 10, 2 -> 13, 3 -> 18, 4 -> 22, 5 -> 28, 6 -> 37, 7 -> 38, 8 -> 53, 9 -> 62, 10 -> 66, 11 -> 83, 12 -> 98)\n"
+     }
+    ]
+   }
+  }
+ ],
+ "name": "Zeppelin Notebook",
+ "id": "",
+ "noteParams": {},
+ "noteForms": {},
+ "angularObjects": {},
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ },
+ "info": {}
+}

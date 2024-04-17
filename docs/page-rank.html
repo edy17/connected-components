@@ -1,0 +1,1004 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>PageRank</title>
+    <link rel="stylesheet" href="dist/stackoverflow-light.min.css">
+    <style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+</style>
+</head>
+<body><article id="9bfc0c69-13fa-4cea-a4a1-985741aa8b88" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🕸️</span></div><h1 class="page-title">PageRank</h1><p class="page-description"></p></header><div class="page-body"><p id="3e9cd593-bc2e-49c3-aa20-2dda85a38ef7" class=""><strong>Edy Diehl TCHEUTCHOA DEFFO</strong></p><p id="64c7d23f-a407-4e1c-8b8f-b27eab08f7bb" class="">
+</p><p id="42b2072a-27b8-4c77-ab85-7292826f9a66" class=""><strong>PageRank</strong>  est un algorithme utilisé par Google pour classer les pages Web dans les résultats de leur moteur de recherche. Il porte le nom à la fois du terme &quot;page Web&quot; et du co-fondateur Larry Page . Le PageRank est un moyen de mesurer l&#x27;importance des pages d&#x27;un site Web. </p><p id="74f18285-9759-4ec7-be01-523d9603c67d" class="">Selon Google :</p><blockquote id="627852f9-7b81-4d39-b3d0-19af2aa35f79" class="">PageRank fonctionne en comptant le nombre et la qualité des liens vers une page pour déterminer une estimation approximative de l&#x27;importance du site Web. L&#x27;hypothèse sous-jacente est que les sites Web plus importants sont susceptibles de recevoir plus de liens d&#x27;autres sites Web. </blockquote><p id="3a5bfff3-3972-4338-9474-387a26ad1191" class="">
+</p><p id="3739c086-df27-411d-bc82-a7f989799363" class="">Actuellement, PageRank n&#x27;est pas le seul algorithme utilisé par Google pour ordonner les résultats de recherche, mais c&#x27;est le premier algorithme utilisé par l&#x27;entreprise, et c&#x27;est le plus connu. Depuis le 24 septembre 2019, PageRank et tous les brevets associés ont expiré.</p><p id="8c94b6f8-00a5-444e-a30d-7eb57e9ea755" class="">Source: wikipedia.org</p><p id="636a60ad-411f-4c5c-b9a6-89bb53235b6a" class="">
+</p><p id="6ddcc44e-24e8-4fa8-811e-e1c6dcc70275" class="">L&#x27;algorithme PageRank repose sur l&#x27;idée qu&#x27;un lien vers une page Web particulière est un &quot;vote&quot; pour cette page. En réalité, on crée un lien vers un site web simplement parce qu&#x27;il est intéressant. Ainsi, Le PageRank est une mesure de l&#x27;importance d&#x27;une page web en fonction de la structure de ses liens.</p><p id="42b34a73-2d3b-46af-876e-a2fbc8bd032b" class="">La valeur du PageRank est basée sur les principes suivants :</p><ul id="b79e5862-f938-496a-82fe-b6b9f2116c47" class="bulleted-list"><li style="list-style-type:disc">Les pages qui ont le plus de liens ont plus de chances d&#x27;être importantes. Les pages sont considérées comme plus importantes si elles sont plus &quot;populaires&quot;.</li></ul><ul id="135e771c-c757-4cb9-be7b-8725dee2165a" class="bulleted-list"><li style="list-style-type:disc">Un lien provenant d&#x27;une page &quot;importante&quot; est plus significatif qu&#x27;un lien provenant d&#x27;une page moins importante. En d&#x27;autres termes, si un lien vers une page est un &quot;vote&quot;, il est important de noter que certains votes sont plus importants que d&#x27;autres.</li></ul><ul id="ba987704-6075-4a31-8697-64e51c08a84e" class="bulleted-list"><li style="list-style-type:disc">Si une page comporte de nombreux liens, chacun de ces liens aura moins d&#x27;importance.</li></ul><p id="7f953c42-8b00-40ff-b305-0f52d0137d35" class="">
+</p><figure id="b93bcd21-f32c-4729-aea5-1e25e6cfe781" class="image"><a href="page-rank/Untitled.png"><img style="width:528px" src="page-rank/Untitled.png"/></a><figcaption>Une illustration simple de l&#x27;algorithme PageRank. Le pourcentage indique l&#x27;importance perçue et les flèches représentent les hyperliens. Source: wikipedia.org</figcaption></figure><p id="88839c82-bde9-4ebc-997b-4de033c38f11" class="">
+</p><p id="9bcb7215-588c-47f7-8767-80dd6fd7b0fe" class="">
+</p><h2 id="a4dfb23f-3795-43fa-9d96-a7ac96f54ae6" class="">1. Algorithme</h2><p id="a4691294-6bc4-43b1-ac03-4285ed813496" class="">
+</p><p id="a3c23bac-dcd4-41a4-bd7e-55348e6bcdd0" class="">Le Web peut être représenté comme un graphe orienté où les nœuds représentent les pages Web et les arrêtes forment des liens entre eux. Typiquement, si un nœud (page web) <em><strong>i</strong></em> est lié à un nœud <em><strong>j</strong></em> , cela signifie que <em><strong>i</strong></em> fait référence à <em><strong>j</strong></em>.</p><p id="30b138d1-35bf-4ce9-b922-0e859b9d5d12" class="">
+</p><ul id="215edbb8-34f6-412b-a657-b5adb325ac25" class="bulleted-list"><li style="list-style-type:disc">L’implémentation de l’algorithme du PageRank commence par la construction d’une matrice de transition mesurant la probabilité de sauter d’une page à l’autre.</li></ul><p id="bb41770d-8025-4256-ae12-95a819a2cdd3" class="">
+</p><figure id="b92f793d-8837-411a-83e5-676467525f57" class="image"><a href="page-rank/Untitled%201.png"><img style="width:720px" src="page-rank/Untitled%201.png"/></a><figcaption>Matrice de transition d’un exemple</figcaption></figure><p id="014a2b90-9494-4222-9c1e-1f0531b930db" class="">La somme de chaque colonne de la matrice ci-dessus est de 1, la matrice est donc stochastique.</p><p id="54e63bb4-c5a0-46ba-86ab-f4be51169e18" class=""> </p><p id="2d3bb259-c7a8-4ed4-86ca-f1ba7307ab96" class="">
+</p><ul id="0c8ba41f-891b-400d-aca2-75077c12a38c" class="bulleted-list"><li style="list-style-type:disc">Ensuite, nous simulons un internaute aléatoire sur un graphe de <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span></span><span>﻿</span></span> sites par un processus de Markov en considérant <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> comme un vecteur de probabilité d’être sur chaque site à l’itération <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span></span><span>﻿</span></span>:</li></ul><figure id="ec26986f-214e-4012-a604-0447d722d701" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub><mo>=</mo><mi>M</mi><msub><mi>v</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">v_i =Mv_{i−1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure><figure id="73d1f038-6c09-4d47-a03f-9b6d3a1cf504" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>v</mi><mn>0</mn></msub><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>k</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>k</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>k</mi></mrow></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">v_0 = \begin{bmatrix}
+1/k\\
+1/k\\
+..\\
+1/k
+\end{bmatrix}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.65em;"><span class="pstrut" style="height:6.8em;"></span><span style="width:0.667em;height:4.800em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='4.800em' viewBox='0 0 667 4800'><path d='M403 1759 V84 H666 V0 H319 V1759 v1200 v1759 h347 v-84
+H403z M403 1759 V0 H319 V1759 v1200 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">..</span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.65em;"><span class="pstrut" style="height:6.8em;"></span><span style="width:0.667em;height:4.800em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='4.800em' viewBox='0 0 667 4800'><path d='M347 1759 V0 H0 V84 H263 V1759 v1200 v1759 H0 v84 H347z
+M347 1759 V0 H263 V1759 v1200 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span></span></span></span></span></span></span></div></figure><ul id="7da9c391-9ab3-4a74-bf21-de0de19e61e1" class="bulleted-list"><li style="list-style-type:disc">Enfin on itère le calcul jusqu’à la convergence des valeurs de <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> représentant le PageRank de chaque page.</li></ul><p id="23f51681-aad7-4a5d-99d0-7af1e89c7999" class="">
+</p><p id="97023594-d130-459d-bd75-8e292694765f" class="">
+</p><p id="9dfb3984-397d-4bae-92a8-deefe9e7af12" class="">Nous proposons ici une implémentation en Scala et Spark d’un algorithme pour calculer le PageRank sur une large échelle de données. Nous considérons l’entrée de l’algorithme comme une liste de toutes les arêtes orienté d’un graphe. Une arête est modélisée par une paire (clé, valeur) représentant deux nœuds connectés, et orienté de la clé vers la valeur. La sortie de l’algorithme sera une liste de paire (clé, valeur) où la clé représente un nœud, et la valeur sa probabilité associé.</p><p id="fd66500b-4a33-43d4-9e19-150eeb03f9a3" class="">
+</p><p id="82dba4d8-3419-44d9-a39e-08b4cb205078" class="">Commençons par instancier une session Spark :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1cdc02eb-4bca-4412-b621-1294c3fa15b5" class="code"><code class="language-scala">import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
+
+val conf = new SparkConf(true)
+val spark = SparkSession
+        .builder()
+        .config(conf)
+        .getOrCreate()</code></pre><p id="0abb27c8-8a6a-49b6-b03d-96727c38f90c" class="">
+</p><p id="3c127c90-d601-4116-b5d5-9881dcf424f6" class="">Implémentation de l’algorithme : </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="5a16b6a5-0e46-4ee7-adf9-4dd8c379365a" class="code"><code class="language-scala">import org.apache.spark.rdd.RDD
+
+def basicPageRank(
+                         links: RDD[(String, Iterable[String])], // RDD des paires (url, neighbors)
+                         rank: RDD[(String, Double)] // RDD des paires (url, rank)
+                 ): RDD[(String, Double)] = {
+    val contributions = links.join(rank).flatMap {
+        case (url, (neighbors, rank)) =&gt;
+            neighbors.map(dest =&gt; (dest, rank / neighbors.size))
+    }
+    contributions.reduceByKey(_ + _)
+}
+
+
+def converge(
+                    edges: RDD[(String, String)],
+                    pageRank: (RDD[(String, Iterable[String])], RDD[(String, Double)]) =&gt; RDD[(String, Double)]
+            ): RDD[(String, Double)] = {
+    val nodes = edges.flatMap(x =&gt; Array(x._1, x._2)).distinct()
+    val nodesCount = nodes.count()
+    val links = edges.groupByKey() // RDD des paires (url, neighbors)
+    var rank = nodes.map(x =&gt; (x, 1D)) // RDD des paires (url, rank)
+    var oldRank = nodes.map(x =&gt; (x, 0D))
+    //seuil de convergence correspondant au minimum de la somme des écarts entre les pageRanks avant et après une itération
+    val threshold = 0.0001
+    //Boucle exécuté tant que le seuil de convergence n&#x27;est pas atteint 
+    while (oldRank.join(rank).map(x =&gt; (x._2._1 - x._2._2).abs).fold(0)((acc, x) =&gt; acc + x) &gt; threshold) {
+        oldRank = rank
+        rank = pageRank(links, rank)
+    }
+    //Normalisation en probabilités
+    rank.mapValues(_ / nodesCount)
+}</code></pre><p id="aea4ff87-538c-4500-95fe-db93eda9132c" class="">
+</p><p id="57bb13ef-5229-442d-b903-dacbcf94945a" class="">Pour les tests, nous pouvons représenter notre graphe d’exemple en tant que liste d’arc (nœuds d’origine et de fin séparés par un caractère de tabulation) dans un fichier de texte de la façon suivante :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a7526fcf-802a-41c4-be1b-7c71df5404de" class="code"><code class="language-plaintext">#FromNodeId	ToNodeId
+A	B
+A	C
+A	D
+B	A
+B	D
+D	B
+D	C
+C	A</code></pre><p id="2b5bdef1-69b7-4b45-9e0a-eac68d6841eb" class="">
+</p><p id="808b78ee-9466-4509-af0d-60ff3bd06795" class="">Tests :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="6ec17943-2bf2-4b4e-b205-ce17ba346acb" class="code"><code class="language-scala">        
+import org.apache.spark.SparkFiles
+
+var root = &quot;file://&quot;
+if (System.getProperty(&quot;os.name&quot;).toLowerCase().contains(&quot;windows&quot;))
+    root = &quot;file:////&quot;
+
+spark.sparkContext.addFile(&quot;https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_1.txt&quot;)
+val raw_data = spark.sparkContext.textFile(root + SparkFiles.get(&quot;test_links_1.txt&quot;))
+        .filter(x =&gt; !x.contains(&quot;#&quot;))
+val segments = raw_data.map(x =&gt; x.split(&quot;\t&quot;)).map(x =&gt; (x(0), x(1)))        
+
+val t0 = System.nanoTime()
+val scores = converge(segments, basicPageRank)
+val t1 = System.nanoTime()
+println(s&quot;Elapsed time : ${((t1 - t0) / 1000000000)} seconds&quot;)
+println(&quot;PageRank : &quot;)
+scores.sortByKey().collect().foreach(println)</code></pre><p id="5eaa2896-5e0f-4e40-b3e4-957325ca0b66" class="">
+</p><p id="247eec17-3e0a-4c17-8e06-9e7d5a80cc33" class="">Sortie :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="8732774d-1b9d-46aa-a4cc-81f260c662ca" class="code"><code class="language-plaintext">Elapsed time : 3 seconds
+PageRank : 
+(A,0.33333587646484375)
+(B,0.22222137451171875)
+(C,0.22222137451171875)
+(D,0.22222137451171875)</code></pre><p id="e799ed0e-1a73-45a4-8662-f293f052cc4c" class="">
+</p><figure id="b8ecb0c0-5ed1-4ccd-8c45-4c17a2185fe6" class="image"><a href="page-rank/Untitled%202.png"><img style="width:528px" src="page-rank/Untitled%202.png"/></a><figcaption>Convergence de l’exemple après 50 itérations</figcaption></figure><p id="2b508d00-91d6-4faf-a1bd-e125f68e9311" class="">
+</p><p id="843a1aec-86c3-44ab-a849-738e8621bb03" class="">Un algorithme efficace de PageRank doit être capable de résoudre de nombreux problèmes ou anomalies tels que les culs-de-sac (pages sans lien sortant), les pièges dans la toile (pages avec des liens vers eux mêmes) ou les Spams de liens (faux liens entrants). Dans cette article nous nous contenterons des problèmes de culs-de-sac et de pièges dans la toile.</p><h2 id="070ff74c-f487-44d3-ab7e-f198a5b4a400" class="">2. Cul-de-sac</h2><p id="021abc0a-af25-4996-8447-cf2c51e4af5b" class="">
+</p><p id="7cc1935a-4803-4fb9-8c35-44ea2ccecda8" class="">PageRank suppose qu’internet est un graphe entièrement connecté. Un cul-de-sac est une page sans liens sortants où l’internaute ne peut pas ressortir. Que se passe-t-il en cas de cul-de-sac ? L’algorithme converge-t-il ?</p><p id="8354cdd8-12d9-4cc1-b588-f167e7881ace" class="">
+</p><figure id="2648ac07-2db9-4124-9af1-e6bf8b7fa0af" class="image"><a href="page-rank/71d367be-355e-469c-8ac6-6dd5413cd904.png"><img style="width:720px" src="page-rank/71d367be-355e-469c-8ac6-6dd5413cd904.png"/></a><figcaption>Matrice de transition d’un exemple</figcaption></figure><p id="b0882d6f-5c9a-44e9-be46-80439a204121" class="">
+</p><p id="bd676025-0dea-4827-a425-a273052fe16c" class="">La somme de chaque colonne de la matrice ci-dessus n’est pas de 1, la matrice n’est donc pas stochastique. En transmettant un tel graphe à la première version de notre algorithme, la probabilité d’être sur n’importe quelle page converge à zéro.</p><p id="d32117f8-0570-4990-902c-dcdec4d05534" class="">
+</p><figure id="a06ff7c7-22f1-4037-a463-f4bc9338ce98" class="image"><a href="page-rank/Untitled%203.png"><img style="width:480px" src="page-rank/Untitled%203.png"/></a><figcaption>Convergence de l’exemple après 50 itérations</figcaption></figure><p id="4aaf2512-0b0a-42eb-9a00-e0b417ab9972" class="">
+</p><p id="30178163-b2b6-4887-ae1a-67660c99af4a" class="">Pour régler le problème des culs-de-sac, une solution consiste à :</p><ul id="db848f06-bbab-4d9b-82bb-5c594a319683" class="bulleted-list"><li style="list-style-type:disc">Supprimer récursivement les culs-de-sac (car supprimer des nœuds peut créer de nouveaux culs-de-sac)</li></ul><ul id="89c95528-7878-4fff-aa33-87b36d27635e" class="bulleted-list"><li style="list-style-type:disc">Calculer PageRank sur le graph connecté</li></ul><ul id="4f22c4c9-ce4c-4560-a465-640e9c9b1b16" class="bulleted-list"><li style="list-style-type:disc">Calculer la probabilité des nœuds supprimés selon la formule :</li></ul><figure id="707f89e1-25de-4fd4-8603-594ab91e9d90" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>P</mi><mrow><mi>C</mi><mi>u</mi><mi>l</mi><mo>−</mo><mi>d</mi><mi>e</mi><mo>−</mo><mi>s</mi><mi>a</mi><mi>c</mi></mrow></msub><mo>=</mo><mstyle scriptlevel="0" displaystyle="true"><munder><mo>∑</mo><mrow><mi>P</mi><mi>a</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>s</mi></mrow></munder><mstyle scriptlevel="0" displaystyle="false"><mfrac><mrow><mi>P</mi><mi>a</mi><mi>g</mi><mi>e</mi><mi>R</mi><mi>a</mi><mi>n</mi><mi>k</mi><mtext> </mtext><mi>d</mi><mi>u</mi><mtext> </mtext><mi>p</mi><mi>a</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>t</mi></mrow><mrow><mi>N</mi><mi>o</mi><mi>m</mi><mi>b</mi><mi>r</mi><mi>e</mi><mtext> </mtext><msup><mi>d</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mi>e</mi><mi>n</mi><mi>f</mi><mi>a</mi><mi>n</mi><mi>t</mi><mi>s</mi><mtext> </mtext><mi>d</mi><mi>u</mi><mtext> </mtext><mi>p</mi><mi>a</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>t</mi></mrow></mfrac></mstyle></mstyle></mrow><annotation encoding="application/x-tex">P_{Cul-de-sac} = \displaystyle\sum_{Parents}\text{\(\frac {PageRank~du~parent} {Nombre~d&#x27;enfants~du~parent}\)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">c</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3443em;vertical-align:-1.2943em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8557em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">P</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">re</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">s</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2943em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9322em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">N</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">mb</span><span class="mord mathnormal mtight">re</span><span class="mspace nobreak mtight"><span class="mtight"> </span></span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">an</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">s</span><span class="mspace nobreak mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">u</span><span class="mspace nobreak mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">re</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">t</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.4461em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">P</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">ank</span><span class="mspace nobreak mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">u</span><span class="mspace nobreak mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">re</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4811em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></div></figure><p id="cbb45e93-5092-4cdf-b404-31228ab5ec04" class="">Implémentation de l’algorithme : </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="c89b04fd-0714-4e4f-8aa1-9dc847582f3b" class="code"><code class="language-scala">import org.apache.spark.util.LongAccumulator
+
+//Accumulateur permettant de compter les culs de sac
+val culDeSacCount: LongAccumulator = spark.sparkContext.longAccumulator(&quot;culDeSacCount&quot;)
+
+//Méthode permettant de supprimer les culs-de-sac retrouvés de façon naive sur un graphe
+def removeCulDeSac(edges: RDD[(String, String)]): (RDD[(String, String)], RDD[String], Array[String]) = {
+    val nodes = edges.flatMap(x =&gt; Array(x._1, x._2)).distinct()
+    val links = edges.groupByKey() // RDD de paires (url, neighbors)
+    val culDeSacRDD = nodes.subtract(links.keys)
+    var bestSegments = edges
+    val culDeSacCollection = culDeSacRDD.collect()
+    culDeSacCollection.foreach(x =&gt; {
+        bestSegments = bestSegments.filter(y =&gt; !Array(y._1, y._2).contains(x))
+    })
+    (bestSegments, culDeSacRDD, culDeSacCollection)
+}
+
+//Méthode permettant de supprimer récursivement tous les culs-de-sac  d&#x27;un Graphe
+def removeAllCulDeSac(edges: RDD[(String, String)]): (RDD[(String, String)], RDD[String], Array[String]) = {
+    var (bestEdges, culDeSacRDD, culDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeCulDeSac(edges)
+    culDeSacCount.reset()
+    var badNodesCount = culDeSacRDD.map(x =&gt; 1).fold(0)((acc, x) =&gt; acc + 1)
+    while (badNodesCount != culDeSacCount.value) {
+        culDeSacCount.reset()
+        culDeSacCount.add(badNodesCount)
+        val (newEdges, newCulDeSacRDD, newCulDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeCulDeSac(bestEdges)
+        bestEdges = newEdges
+        culDeSacRDD = culDeSacRDD.union(newCulDeSacRDD)
+        culDeSacCollection = Array.concat(culDeSacCollection, newCulDeSacCollection)
+    }
+    (bestEdges, culDeSacRDD, culDeSacCollection)
+}
+
+//Méthode de calcul de PageRank sur un graphe avec gestion des de Culs-de-sac
+def computePageRank(edges: RDD[(String, String)]): (RDD[(String, Double)], Array[String]) = {
+    //On sépare les culs-de-sac du graphe en entré et on calcul les PageRank sur le graphe connecté resultant
+    val (bestEdges, culDeSacRDD, culDeSacCollection): (RDD[(String, String)], RDD[String], Array[String]) = removeAllCulDeSac(edges)
+    val links = edges.groupByKey() // RDD of (url, neighbors) pairs
+    var ranks = converge(bestEdges, basicPageRank)
+    //Si le graphe en entré contient des Culs-de-sac, on calcul leur pageRank à partir de ceux de leur connexion présent dans le graphe connecté
+    if (culDeSacCollection.length &gt; 0) {
+        var culDeSacRanks = culDeSacRDD.map(x =&gt; (x, 0D))
+        while (culDeSacRanks.filter(x =&gt; x._2 == 0).count() &gt; 0) {
+            val tmp = links.join(ranks.union(culDeSacRanks))
+            var newCulDeSacRanks = spark.sparkContext.emptyRDD[(String, Double)]
+            culDeSacCollection.foreach(x =&gt; {
+                newCulDeSacRanks = tmp.filter {
+                    case (url, (neighbors, rank)) =&gt;
+                        neighbors.count(y =&gt; x.equals(y)) &gt;= 1
+                }.map {
+                    case (url, (neighbors, rank)) =&gt;
+                        (x, rank / neighbors.size)
+                }.union(newCulDeSacRanks)
+            })
+            culDeSacRanks = newCulDeSacRanks.reduceByKey(_ + _)
+        }
+        ranks = ranks.union(culDeSacRanks)
+    }
+    (ranks.sortByKey(), culDeSacCollection)
+}
+</code></pre><p id="5b498af0-52f1-48b4-ad46-8cc069abd98e" class="">
+</p><p id="2448f23c-02e8-44f0-a031-56336adca372" class="">Fichier d’entrée :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="dff05e21-255c-44e0-bd93-414412d97b38" class="code"><code class="language-plaintext">#FromNodeId ToNodeId
+A	B
+A	C
+A	D
+B	A
+B	D
+D	B
+D	C</code></pre><p id="bd0a94fc-068e-4211-b376-3c461e277e27" class="">
+</p><p id="b21a4b05-aab0-4a1a-bd64-056df7b5b6a2" class="">Tests :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="48309c63-144a-42ed-887e-2b93e2a64cd4" class="code"><code class="language-scala">spark.sparkContext.addFile(&quot;https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_2.txt&quot;)
+val raw_data = spark.sparkContext.textFile(root + SparkFiles.get(&quot;test_links_2.txt&quot;))
+        .filter(x =&gt; !x.contains(&quot;#&quot;))
+val segments = raw_data.map(x =&gt; x.split(&quot;\t&quot;)).map(x =&gt; (x(0), x(1)))
+
+val t0 = System.nanoTime()
+val (scores, culDeSac) = computePageRank(segments)
+val t1 = System.nanoTime()
+println(s&quot;Elapsed time : ${((t1 - t0) / 1000000000)} seconds&quot;)
+println(&quot;PageRank : &quot;)
+scores.sortByKey().collect().foreach(println)
+println(&quot;Culs-de-sac : &quot;)
+culDeSac.foreach(println)
+println(s&quot;Sum of probabilities : ${scores.values.sum()}&quot;)</code></pre><p id="f43f3447-5b30-4061-8ea0-da898006a36d" class="">
+</p><p id="559b0fcf-9283-48f3-a4df-cdec9c652a06" class="">Sortie :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="6976759e-79ad-4fff-9bbb-c7d91b3ec14a" class="code"><code class="language-plaintext">Elapsed time : 2 seconds
+PageRank : 
+(A,0.22221883138020834)
+(B,0.4444478352864583)
+(C,0.24073961046006942)
+(D,0.3333333333333333)
+Culs-de-sac : 
+C
+Sum of probabilities : 1.2407396104600692</code></pre><p id="b793dcb6-02bc-4a78-b0b4-c1811a0bb5b7" class="">
+</p><p id="d05dec61-df5b-44bf-9c0b-e0512a7df8ae" class="">La somme des probabilités des pages est maintenant plus grande que 1, mais cela marche.</p><p id="2438a84b-0d2f-497d-be04-fa945f144bb6" class="">
+</p><h2 id="8c7530f7-e400-4676-9925-cb2689a459dc" class="">3. Pièges dans la toile</h2><p id="9e0c3766-f72c-40b2-95fe-7b7ea5ba9a30" class="">
+</p><p id="244ad49f-a6cd-4a94-88f8-04d5b18fcaa9" class="">Si une page essaye de capturer un internaute avec un lien sortant qui ramène vers cette page, il s&#x27;agit d’un piège.</p><figure id="cbb3a83f-065e-4fd8-9ba6-aaae4107e04e" class="image"><a href="page-rank/Untitled%204.png"><img style="width:672px" src="page-rank/Untitled%204.png"/></a><figcaption>Matrice de transition d’un exemple</figcaption></figure><p id="849866a1-0433-458a-a667-6550c6d51f34" class=""> La somme de chaque colonne de la matrice ci-dessus est 1, la matrice est toujours stochastique malgré le piège. Ainsi, l’internaute pourra toujours naviguer, mais ne pourra pas quitter la page C.</p><p id="03ef6208-33ed-4bbd-9fd1-f98c44f1f3a1" class=""> En transmettant un tel graphe à la première version de notre algorithme, la probabilité d’être sur la page piège converge à 1 et la<br/>probabilité d’être ailleurs converge à 0.<br/></p><figure id="7246c90b-177c-4053-a03d-5e816822c9e1" class="image"><a href="page-rank/Untitled%205.png"><img style="width:480px" src="page-rank/Untitled%205.png"/></a><figcaption>Convergence de l’exemple après 50 itérations</figcaption></figure><p id="eb7feba4-be91-424b-875f-3f2faca10ae8" class="">
+</p><p id="9f527389-c43d-4c07-b98d-391a77873881" class="">Pour régler le problème des pièges dans la toile, une solution consiste à :</p><ul id="83f9f35a-152a-42ef-b6ef-f6b8f22e3ac7" class="bulleted-list"><li style="list-style-type:disc">Ajouter une constante de taxation <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span></span><span>﻿</span></span> représentant la probabilité que l’internaute décide aléatoirement de continuer la navigation. Ainsi, <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1-\beta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span> représente la probabilité que l’internaute décide aléatoirement de s’arrêter et de recommencer la navigation. Le vecteur de probabilité est dans ce cas :</li></ul><figure id="f3a248ce-67fd-45a7-98ce-f9f3c47bbbe3" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub><mo>=</mo><mi>β</mi><mi>M</mi><msub><mi>v</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo stretchy="false">)</mo><msub><mi>v</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">v_i = \beta Mv_{i−1} + (1-\beta)v_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9028em;vertical-align:-0.2083em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">βM</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure><p id="6f14de46-5554-4502-896b-986d999c7ed4" class="">
+</p><p id="ca59b92d-93a5-4a3c-85be-3867b3b8d921" class=""><strong>Cette solution est aussi efficace contre les culs-de-sac car </strong><strong><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo stretchy="false">)</mo><msub><mi>v</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">(1-\beta)v_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></strong><strong> empêche les probabilités de converger vers zéro.</strong></p><p id="3a8da9aa-9c32-4f3b-9ed4-2752236b1f88" class="">
+</p><p id="c3e8da14-88e7-4835-a732-05876f9882f7" class="">
+</p><p id="d489ef9f-ce9f-43c1-b370-3ec8f002d123" class="">Implémentation de l’algorithme : </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="8b08c2f4-44c5-4ae8-8fd1-d963cc16c4ed" class="code"><code class="language-scala">def optimizedPageRank(
+                         links: RDD[(String, Iterable[String])], // RDD des paires (url, neighbors)
+                         rank: RDD[(String, Double)] // RDD des paires (url, rank)
+                 ): RDD[(String, Double)] = {
+    val contributions = links.join(rank).flatMap {
+        case (url, (neighbors, rank)) =&gt;
+            neighbors.map(dest =&gt; (dest, rank / neighbors.size))
+    }
+    contributions.reduceByKey(_ + _).mapValues(.15 +.85 * _)
+}</code></pre><p id="deb0d006-effe-4f6c-861f-d95c86c0f8d5" class="">
+</p><p id="02afbdaf-18d2-4b70-922f-529502b38a2f" class="">Fichier d’entrée :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="28d4ed5e-5fc4-4b48-8cdc-d274042b68cc" class="code"><code class="language-plaintext">#FromNodeId	ToNodeId
+A	B
+A	C
+A	D
+B	A
+B	D
+D	B
+D	C
+C	C</code></pre><p id="a29663fb-f623-4e39-bfa3-34a0e5f1d748" class="">
+</p><p id="6d21f365-081a-4f74-9d17-22881cb54bc8" class="">Tests :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="55cc1421-12b0-4e73-a243-a3dc5c5ecb4e" class="code"><code class="language-scala">spark.sparkContext.addFile(&quot;https://gitlab.com/diehl17/data/-/raw/main/tests/test_links_3.txt&quot;)
+val raw_data = spark.sparkContext.textFile(root + SparkFiles.get(&quot;test_links_3.txt&quot;))
+        .filter(x =&gt; !x.contains(&quot;#&quot;))
+val segments = raw_data.map(x =&gt; x.split(&quot;\t&quot;)).map(x =&gt; (x(0), x(1)))
+
+val t0 = System.nanoTime()
+val scores = converge(segments, optimizedPageRank)
+val t1 = System.nanoTime()
+println(s&quot;Elapsed time : ${((t1 - t0) / 1000000000)} seconds&quot;)
+println(&quot;PageRank : &quot;)
+scores.sortByKey().collect().foreach(println)</code></pre><p id="0f91f6ff-cb30-4880-a257-9531b5e2cc60" class="">
+</p><p id="faaaed3b-2e21-4483-bb90-533fec3c0543" class="">Sortie :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="7b5c1bb2-1785-4309-b332-b3031c0c9447" class="code"><code class="language-plaintext">Elapsed time : 2 seconds
+PageRank : 
+(A,0.08249806035575515)
+(B,0.10587336990486451)
+(C,0.7057551998345155)
+(D,0.10587336990486451)</code></pre><p id="44363442-694c-400f-91da-fe161c9956c7" class="">
+</p><p id="9d4076d8-8fb2-4e54-91ab-932ea6efa73b" class="">
+</p><h2 id="f138776c-e311-4201-8ba9-cf56f76048fc" class="">4. Optimisation de l’exécution sur Spark par le partitionnement des données</h2><p id="d39a700d-5f19-4883-b50f-b86ef6a0f653" class="">
+</p><p id="b4c6c447-dfc1-4238-98bc-1beca2967b21" class="">Le partitionnement Spark est un moyen de diviser les données dans plusieurs partitions distribuées afin de pouvoir exécuter des transformations simultanément ou en parallèle, ce qui permet de terminer des taches plus rapidement. Pour pouvoir optimiser l’exécution de notre algorithme, nous avons privilégié l’utilisation de méthode Spark tirant partie du partitionnement tel que <code>mapValues</code> et <code>fold</code>.</p><p id="9d1bc2a6-655f-46e9-815a-1fc237fa8e4a" class="">
+</p><p id="8078e7fd-5dbd-4d2c-9d6a-96266e104326" class="">La configuration du partitionnement étant lié à l’infrastructure physique, nous allons tester nos algorithme avec et sans partitionnement sur un serveur Spark autonome possédant <strong>16 Go de RAM et 8 processeurs logiques</strong>. Pour pouvoir utiliser efficacement nos ressources physiques, nous allons allouer 6 processeurs pour les exécuteurs Spark, <strong>1 processeur pour le processus pilote</strong> et le processeur restant pour le cluster Manager et le système d’exploitation. Les <strong>6 processeurs logiques seront repartis sur 3 exécuteurs Spark, donc 3 cœurs par exécuteurs</strong>. Pour la mémoire RAM, nous allons utiliser <strong>2 Go par exécuteur Spark</strong>, <strong>1 Go pour le processus pilote</strong> et le reste pour le système d’exploitation. Avec 6 processeurs dédié à nos taches Spark, nous pourrons ainsi traité <strong>6 partitions simultanément</strong>.</p><p id="a69b519e-fdf3-4c40-81a1-b006de813ccd" class="">Nous pouvons initialiser notre configuration Spark comme suit:</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="04baddcf-a199-4096-b4ad-07298bcff065" class="code"><code class="language-scala">val conf = new SparkConf(false)
+conf.set(&quot;spark.app.name&quot;, &quot;page-rank&quot;)
+conf.set(&quot;spark.master&quot;, &quot;local[6]&quot;)
+conf.set(&quot;spark.driver.memory&quot;, &quot;1g&quot;)
+conf.set(&quot;spark.driver.cores&quot;, &quot;1&quot;)
+conf.set(&quot;spark.cores.max&quot;, &quot;6&quot;)
+conf.set(&quot;spark.executor.instances&quot;, &quot;3&quot;)
+conf.set(&quot;spark.executor.cores&quot;, &quot;2&quot;)
+conf.set(&quot;spark.executor.memory&quot;, &quot;2g&quot;)
+conf.set(&quot;spark.default.parallelism&quot;, &quot;6&quot;)
+conf.set(&quot;spark.sql.shuffle.partitions&quot;, &quot;6&quot;)
+
+val spark = SparkSession
+      .builder()
+      .config(conf)
+      .getOrCreate()</code></pre><p id="37263750-027a-4665-826c-c95b4c75ab99" class="">
+</p><p id="eb23043d-d142-43e7-b6ae-293b915e1d2d" class="">Dès leurs créations, les collections Spark sont partitionnées selon des configurations définies ou par défaut pouvant ne pas correspondre à la réalité des ressources physiques. Toutefois, si nous supposons une collection Spark RDD stockant notre graphe en tant que liste de paires (clé, valeur) dans une variable  <code>segments: RDD[(String, String)]</code> à transmettre comme argument à notre algorithme,  nous pourrons transmettre la variable <code>segments.partitionBy(new HashPartitioner(</code><strong><code>1</code></strong><code>))</code>  pour une exécution sans partitionnement, ou nous pourrons transmettre <code>segments.partitionBy(new HashPartitioner(</code><strong><code>6</code></strong><code>))</code> pour une exécution parallèle sur nos 6 cœurs de processeur.</p><p id="3c5b94e7-e8d0-47eb-828d-eb858ff9dabf" class="">
+</p><h3 id="1e6081f8-0d08-4a19-8243-4eb5e4fd3606" class="">Analyse expérimentale sur des graphes de taille croissante</h3><p id="8f978430-f02b-4888-8349-db2a7e80b46a" class="">
+</p><p id="1a5ae674-3e99-44e8-90dc-9d13e6298ff8" class="">Nous allons considérer <a href="https://gitlab.com/diehl17/data/-/tree/main/flights">12 jeux de données</a> contenant environ 7 millions de vols entre aéroports pendant les 12 mois de l’année 2012. En considérant chaque vol comme un lien orienté de l’aéroport de départ (ORIGIN_AIRPORT_ID) vers l’aéroport d’arrivé (DEST_AIRPORT_ID), nous allons calculer le PageRank de chaque aéroport dans les 12 jeux de données en les concaténant successivement pour pouvoir augmenter progressivement la taille du graphe traité par l’algorithme. </p><p id="1ebfc69a-fdeb-48ef-9d54-fc97ddfc132b" class="">
+</p><p id="f4022690-7f96-478b-a234-b132f77c0730" class="">Téléchargements des données:</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="96b02f86-ee2f-48e5-9f64-4be9121544da" class="code"><code class="language-scala">for (i &lt;- 1 to 12) {
+    val fileName = &quot;2012&quot; + (if (i &gt; 9) i else (&quot;0&quot; + i)) + &quot;.csv&quot;
+    spark.sparkContext.addFile(&quot;https://gitlab.com/diehl17/data/-/raw/main/flights/&quot; + fileName)
+    println(spark.sparkContext.textFile(root + SparkFiles.get(fileName)).count())
+}</code></pre><p id="e48c1e9b-7327-4da1-9d43-4a47616b7ace" class="">
+</p><p id="c017150c-9949-4f60-bb05-2fb9c626e0e1" class="">L’algorithme d’exécution sans partitionnement est le suivant: </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a460c0d8-fce6-46bc-bc44-383a9f493089" class="code"><code class="language-scala">import org.apache.spark.HashPartitioner
+
+var raw_data = spark.sparkContext.emptyRDD[(String, String)]
+var timePerDataSet: Map[Int, Long] = Map()
+for (i &lt;- 1 to 12) {
+    val fileName = &quot;2012&quot; + (if (i &gt; 9) i else (&quot;0&quot; + i)) + &quot;.csv&quot;
+    val data = spark.sparkContext.textFile(root + SparkFiles.get(fileName))
+            .map(x =&gt; {
+                val row = x.split(&quot;,&quot;)
+                (row(3), row(4))
+            })
+    raw_data = raw_data.union(data)
+    val segments = raw_data.filter(x =&gt; !x._1.contains(&quot;ORIGIN_AIRPORT_ID&quot;))
+    val t0 = System.nanoTime()
+    val scores = converge(segments.partitionBy(new HashPartitioner(1)), optimizedPageRank)
+    val t1 = System.nanoTime()
+    val time = (t1 - t0) / 1000000000
+    timePerDataSet += (i -&gt; time)
+    println(i + &quot; Dataset(s) processed _____________________________________&quot;)
+    println(&quot;Elapsed time: &quot; + time + &quot; seconds&quot;)
+    println(&quot;Total nodes: &quot; + scores.count())
+    println(&quot;Total edges: &quot; + segments.count())
+}</code></pre><p id="605c8236-0c65-457e-8e5e-7bdfc733fa97" class="">
+</p><p id="ecddeca3-8e22-4077-92e0-b0411c1cc2d3" class="">
+</p><p id="4c8733be-1658-4792-ac35-6b78c6349051" class="">L’algorithme d’exécution avec partitionnement est le suivant: </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="039a861b-6281-4106-81d8-f5daf7208fb6" class="code"><code class="language-scala">import org.apache.spark.HashPartitioner
+
+var raw_data = spark.sparkContext.emptyRDD[(String, String)]
+var timeOptPerDataSet: Map[Int, Long] = Map()
+for (i &lt;- 1 to 12) {
+    val fileName = &quot;2012&quot; + (if (i &gt; 9) i else (&quot;0&quot; + i)) + &quot;.csv&quot;
+    val data = spark.sparkContext.textFile(root + SparkFiles.get(fileName))
+            .map(x =&gt; {
+                val row = x.split(&quot;,&quot;)
+                (row(3), row(4))
+            })
+    raw_data = raw_data.union(data)
+    val segments = raw_data.filter(x =&gt; !x._1.contains(&quot;ORIGIN_AIRPORT_ID&quot;))
+    val t0 = System.nanoTime()
+    val scores = converge(segments.partitionBy(new HashPartitioner(6)), optimizedPageRank)
+    val t1 = System.nanoTime()
+    val time = (t1 - t0) / 1000000000
+    timeOptPerDataSet += (i -&gt; time)
+    println(i + &quot; Dataset(s) processed _____________________________________&quot;)
+    println(&quot;Elapsed time: &quot; + time + &quot; seconds&quot;)
+    println(&quot;Total nodes: &quot; + scores.count())
+    println(&quot;Total edges: &quot; + segments.count())
+}</code></pre><p id="3ccd27f5-0680-4ffa-bf09-8ef49a09905e" class="">
+</p><p id="381ac158-5797-4503-a693-42fe62799c93" class="">
+</p><p id="4ebdfaae-546b-4216-8852-71f220e227f8" class="">Pour chaque itération, nous pouvons ainsi constater que le temps d’exécution est toujours inférieur pour la version avec partitionnement :</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="2348e2ee-716c-4238-b2a9-bc3791023b7b" class="code"><code class="language-scala">import scala.collection.immutable.ListMap
+
+val x = ListMap(timePerDataSet.toSeq.sortBy(_._1): _*)
+val y = ListMap(timeOptPerDataSet.toSeq.sortBy(_._1): _*)</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="671eed65-6143-4b3d-a875-77edff1ea481" class="code"><code class="language-scala">x: scala.collection.immutable.ListMap[Int,Long] = ListMap(1 -&gt; 19, 2 -&gt; 28, 3 -&gt; 42, 4 -&gt; 57, 5 -&gt; 64, 6 -&gt; 79, 7 -&gt; 108, 8 -&gt; 123, 9 -&gt; 137, 10 -&gt; 146, 11 -&gt; 189, 12 -&gt; 220)
+y: scala.collection.immutable.ListMap[Int,Long] = ListMap(1 -&gt; 10, 2 -&gt; 13, 3 -&gt; 18, 4 -&gt; 22, 5 -&gt; 28, 6 -&gt; 37, 7 -&gt; 38, 8 -&gt; 53, 9 -&gt; 62, 10 -&gt; 66, 11 -&gt; 83, 12 -&gt; 98)</code></pre><p id="0bef1a55-c431-4792-9f86-7325bfa68c25" class="">
+</p><figure id="800ed895-3f7a-4dd8-94c0-9c3dac19f6ea" class="image"><a href="page-rank/Untitled%206.png"><img style="width:851px" src="page-rank/Untitled%206.png"/></a></figure><p id="10e2d003-8ef4-4b92-90b9-f7022348c93e" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span>
+
+<script src="dist/highlight.min.js"></script>
+<script src="dist/scala.min.js"></script>
+<script src="dist/plaintext.min.js"></script>
+<script>
+    hljs.highlightAll();
+</script>
+</body></html>
